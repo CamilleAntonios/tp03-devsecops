@@ -91,16 +91,17 @@ jobs:
     executor: simple-executor
     steps:
       - run:
-        name: Install Infisical
-        command: |
-          curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh'
-          sudo -E bash
-          sudo apt-get update && sudo apt-get install -y infisical
+          name: Install Infisical
+          command: |
+            curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh'
+            sudo -E bash
+            sudo apt-get update && sudo apt-get install -y infisical
 
-        name: Login with infisical
-        command: |
-          infisical login --method=oidc-auth --machine-identity-id=f181767e-15fb-4104-a23a-cacb5975ab22 --jwt=$CIRCLE_OIDC_TOKEN
-          echo "Connection done !"
+      - run:
+          name: Login with infisical
+          command: |
+            infisical login --method=oidc-auth --machine-identity-id=f181767e-15fb-4104-a23a-cacb5975ab22 --jwt=$CIRCLE_OIDC_TOKEN
+            echo "Connection done !"
 
   build-setup:
     executor: php-executor
