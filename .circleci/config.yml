@@ -93,6 +93,7 @@ jobs:
       - run:
           name: Retrieve secrets
           command: |
+            echo "$INFISCAL_TOKEN"
             curl --request GET \
               --url 'https://eu.infisical.com/api/v4/secrets?projectId=15dca0ed-fceb-4a07-9098-192215c6903b&environment=dev' \
               --header "Authorization: Bearer $INFISCAL_TOKEN"
