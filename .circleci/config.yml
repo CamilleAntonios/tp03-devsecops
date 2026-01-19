@@ -67,12 +67,6 @@ executors:
     docker:
       - image: cimg/base:stable
         name: localhost
-  infisical-executor:
-    resource_class: small
-    shell: /bin/bash
-    docker:
-      - image: infisical/cli:latest
-        name: localhost
 
 
 
@@ -94,13 +88,13 @@ jobs:
             env
 
   setup-infiscal-secrets:
-    executor: infisical-executor
+    docker:
+      - image: infisical/cli:latest
+        command: ["login", "--method=oidc-auth", "--machine-identity-id=f181767e-15fb-4104-a23a-cacb5975ab22", "--jwt=$CIRCLE_OIDC_TOKEN"]
     steps:
       - run:
-          name: Login with infisical
-          command: |
-            infisical login --method=oidc-auth --machine-identity-id=f181767e-15fb-4104-a23a-cacb5975ab22 --jwt=$CIRCLE_OIDC_TOKEN
-            echo "Connection done !"
+          name: Run infisical login
+          command: true
 
   build-setup:
     executor: php-executor
