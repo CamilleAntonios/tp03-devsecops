@@ -88,13 +88,14 @@ jobs:
             env
 
   setup-infiscal-secrets:
-    docker:
-      - image: infisical/cli:latest
-        command: ["login", "--method=oidc-auth", "--machine-identity-id=f181767e-15fb-4104-a23a-cacb5975ab22", "--jwt=$CIRCLE_OIDC_TOKEN"]
+    executor: simple-executor
     steps:
       - run:
-          name: Run infisical login
-          command: true
+          name: Retrieve secrets
+          command: |
+            curl --request GET \
+              --url 'https://eu.infisical.com/api/v4/secrets?projectId=15dca0ed-fceb-4a07-9098-192215c6903b&environment=dev' \
+              --header 'Authorization: Bearer ${INFISCAL_TOKEN}'
 
   build-setup:
     executor: php-executor
