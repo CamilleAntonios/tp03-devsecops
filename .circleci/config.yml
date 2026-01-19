@@ -67,6 +67,12 @@ executors:
     docker:
       - image: cimg/base:stable
         name: localhost
+  infisical-executor:
+    resource_class: small
+    shell: /bin/bash
+    docker:
+      - image: infisical/cli:latest
+        name: localhost
 
 
 
@@ -88,15 +94,8 @@ jobs:
             env
 
   setup-infiscal-secrets:
-    executor: simple-executor
+    executor: infisical-executor
     steps:
-      - run:
-          name: Install Infisical
-          command: |
-            curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh'
-            sudo -E bash
-            sudo apt-get update && sudo apt-get install -y infisical
-
       - run:
           name: Login with infisical
           command: |
