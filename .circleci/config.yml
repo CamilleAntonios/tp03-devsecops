@@ -54,12 +54,12 @@ executors:
     shell: /bin/bash
     docker:
       - name: localhost
-        image: cimg/php:8.1
+        image: cimg/php:8.2
   builder-executor:
     resource_class: small
     shell: /bin/bash
     docker:
-      - image: cimg/php:8.1-node
+      - image: cimg/php:8.2-node
         name: localhost
   simple-executor:
     resource_class: small
@@ -96,7 +96,7 @@ jobs:
             cat .infisical_env
             env
 
-  setup-infiscal-secrets:
+  setup-infisical-secrets:
     executor: node-executor
     steps:
       - run:
@@ -255,10 +255,8 @@ jobs:
 workflows:
   main_workflow:
     jobs:
-      - setup-infiscal-secrets
-      - debug-info:
-          requires:
-            - setup-infiscal-secrets
+      - debug-info
+      - setup-infisical-secrets
       - build-setup
       - lint-phpcs:
           requires:
