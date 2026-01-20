@@ -193,6 +193,7 @@ jobs:
     executor: builder-executor
     steps:
       - checkout
+      - *attach_workspace
       - run:
           name: Source Infisical secrets
           command: |
