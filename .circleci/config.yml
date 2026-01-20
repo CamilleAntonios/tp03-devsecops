@@ -301,7 +301,10 @@ workflows:
 
   container_workflow:
     jobs:
+      -setup-infisical-secrets
       - build-docker-image:
+          requires:
+            - setup-infisical-secrets
           filters:
             branches:
               only:
