@@ -301,7 +301,7 @@ workflows:
 
   container_workflow:
     jobs:
-      -setup-infisical-secrets
+      - setup-infisical-secrets
       - build-docker-image:
           requires:
             - setup-infisical-secrets
