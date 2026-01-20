@@ -80,7 +80,7 @@ jobs:
   debug-info:
     executor: php-executor
     steps:
-    - *attach_workspace
+      - *attach_workspace
       - run:
           name: Debug
           command: |
