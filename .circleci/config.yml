@@ -201,6 +201,8 @@ jobs:
             set -a
             source .infisical_env
             set +a
+            echo $GHCR_PAT
+            echo $GHCR_USERNAME
               
       - setup_remote_docker:
           docker_layer_caching: true
