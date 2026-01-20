@@ -217,8 +217,11 @@ jobs:
             REPOSITORY=$(echo "ghcr.io/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
             TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
 
+            echo $GHCR_PAT
+            echo $GHCR_USERNAME
+
             # Login to GHCR
-            echo "$GHCR_PAT" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+            echo $GHCR_PAT | docker login ghcr.io -u $GHCR_USERNAME --password-stdin
 
             # Build the Docker image
             docker build \
