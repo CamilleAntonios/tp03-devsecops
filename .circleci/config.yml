@@ -99,7 +99,7 @@ jobs:
       - run:
           name: Install infisical cli
           command: |
-            npm install @infisical/cli
+            sudo npm install -g @infisical/cli
       - run:
           name: Exports Infisical secrets
           command: |
