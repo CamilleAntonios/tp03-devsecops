@@ -216,7 +216,7 @@ jobs:
             echo $GHCR_USERNAME
 
             # Login to GHCR
-            echo $GHCR_PAT > docker login ghcr.io --username $GHCR_USERNAME --password-stdin
+            echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
 
             # Build the Docker image
             docker build \
