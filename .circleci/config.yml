@@ -78,6 +78,7 @@ executors:
 
 jobs:
   debug-info:
+    
     executor: php-executor
     steps:
       - *attach_workspace
@@ -254,8 +255,10 @@ jobs:
 workflows:
   main_workflow:
     jobs:
-      - debug-info
       - setup-infiscal-secrets
+      - debug-info:
+          requires:
+            - setup-infiscal-secrets
       - build-setup
       - lint-phpcs:
           requires:
