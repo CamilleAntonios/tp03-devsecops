@@ -194,21 +194,14 @@ jobs:
     steps:
       - checkout
       - *attach_workspace
-      - run:
-          name: Source Infisical secrets
-          command: |
-            echo "Sourcing Infisical secrets"
-            set -a
-            source .infisical_env
-            set +a
-            echo $GHCR_PAT
-            echo $GHCR_USERNAME
               
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
           name: Build and Push Docker Image to GHCR (GitHub Container Registry)
           command: |
+            source .infisical_env
+
             if [ ! -z "$SKIP_BUILD" ]; then
               echo "Skipping build"
               circleci step halt
