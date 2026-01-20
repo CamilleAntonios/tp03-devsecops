@@ -131,7 +131,7 @@ jobs:
       - *attach_workspace
       - run:
           name: Cat the content of .infisical_env
-          run: |
+          command: |
             cat .infisical_env
       - run:  
           name: Install PHP_CodeSniffer and PHPCompatibility
