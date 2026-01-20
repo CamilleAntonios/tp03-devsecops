@@ -67,6 +67,12 @@ executors:
     docker:
       - image: cimg/base:stable
         name: localhost
+  node-executor:
+    resource_class: small
+    shell: /bin/bash
+    docker:
+      - image: cimg/node:20.11
+        name: localhost
 
 
 
@@ -88,15 +94,17 @@ jobs:
             env
 
   setup-infiscal-secrets:
-    executor: simple-executor
+    executor: node-executor
     steps:
       - run:
-          name: Retrieve secrets
+          name: Install infisical cli
           command: |
-            curl --request GET \
-              --url 'https://eu.infisical.com/api/v4/secrets?projectId=15dca0ed-fceb-4a07-9098-192215c6903b&environment=dev' \
-              --header "Authorization: Bearer $INFISICAL_TOKEN"
-
+            npm install -g @infisical/cli
+      - run:
+          name: Exports Infisical secrets
+          command: |
+            infisical export --token=$INFISICAL_TOKEN --projectId=$INFISICAL_PROJECT_ID --domain=https://eu.infisical.com > .infisical_env
+      - *persist_to_workspace # sauvegarde le fichier .env
   build-setup:
     executor: php-executor
     steps:
@@ -121,6 +129,10 @@ jobs:
     executor: php-executor
     steps:
       - *attach_workspace
+      - run:
+          name: Cat the content of .infisical_env
+          run: |
+            cat .infisical_env
       - run:  
           name: Install PHP_CodeSniffer and PHPCompatibility
           command: composer require --dev "squizlabs/php_codesniffer=*" "phpcompatibility/php-compatibility=*"
