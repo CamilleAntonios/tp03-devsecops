@@ -197,6 +197,7 @@ jobs:
       - run:
           name: Source Infisical secrets
           command: |
+            cat .infisical_env
             if [ -f .infisical_env ]; then
               echo "Sourcing Infisical secrets"
               set -a
