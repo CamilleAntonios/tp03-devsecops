@@ -187,6 +187,33 @@ jobs:
       - run:
           name: Run PHPUnit
           command: ./vendor/bin/phpunit --testsuite=Unit
+  metrics-phpmetrics:
+    executor: php-executor
+    steps:
+      - *attach_workspace
+      - run:
+          name: Install PHPMetrics
+          command: composer require --dev phpmetrics/phpmetrics
+      - run:
+          name: Run PHPMetrics
+          command: ./vendor/bin/phpmetrics --report-html=phpmetrics-report --extensions=php --exclude=vendor src/
+      - store_artifacts:
+          path: phpmetrics-report
+          destination: phpmetrics-report
+          
+  metrics-phploc:
+    executor: php-executor
+    steps:
+      - *attach_workspace
+      - run:
+          name: Install PHPLOC
+          command: composer require --dev phploc/phploc
+      - run:
+          name: Run PHPLOC
+          command: ./vendor/bin/phploc --count-tests --exclude=vendor --log-csv=phploc-report.csv src/
+      - store_artifacts:
+          path: phploc-report.csv
+          destination: phploc-report
 
 
   build-docker-image:
