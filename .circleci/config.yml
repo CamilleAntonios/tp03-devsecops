@@ -187,7 +187,7 @@ jobs:
       - run:
           name: Run PHPUnit
           command: ./vendor/bin/phpunit --testsuite=Unit
-          
+
   metrics-phpmetrics:
     executor: php-executor
     steps:
@@ -207,11 +207,13 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: Install PHPLOC
-          command: composer require --dev phploc/phploc
+          name: Download PHPLOC
+          command: |
+            curl -L -o phploc.phar https://phar.phpunit.de/phploc.phar
+            chmod +x phploc.phar
       - run:
           name: Run PHPLOC
-          command: ./vendor/bin/phploc --count-tests --exclude=vendor --log-csv=phploc-report.csv src/
+          command: ./phploc.phar --count-tests --exclude=vendor --log-csv=phploc-report.csv src/
       - store_artifacts:
           path: phploc-report.csv
           destination: phploc-report
