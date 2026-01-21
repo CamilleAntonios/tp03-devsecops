@@ -33,6 +33,19 @@ version: 2.1
 #
 #  2. Suffixes based on the specific tool or task:
 #  For example, for a job that uses PHP_CodeSniffer, use phpcs as a suffix.
+# Default configuration for persist_to_workspace and attach_workspace commands
+persist_to_workspace: &persist_to_workspace
+  persist_to_workspace:
+    root: .
+    paths:
+      - .
+
+attach_workspace: &attach_workspace
+  attach_workspace:
+    # Must be absolute path or relative path from working_directory
+    at: ~/project
+
+
 commands:
   deploy_to_host:
     parameters:
@@ -70,18 +83,6 @@ commands:
             docker pull $REPOSITORY:$TAG
             docker run -p 80:80 -d $REPOSITORY:$TAG
             EOF
-
-# Default configuration for persist_to_workspace and attach_workspace commands
-persist_to_workspace: &persist_to_workspace
-  persist_to_workspace:
-    root: .
-    paths:
-      - .
-
-attach_workspace: &attach_workspace
-  attach_workspace:
-    # Must be absolute path or relative path from working_directory
-    at: ~/project
 
 # This main executor is used by all jobs unless otherwise specified
 executors:
