@@ -33,7 +33,43 @@ version: 2.1
 #
 #  2. Suffixes based on the specific tool or task:
 #  For example, for a job that uses PHP_CodeSniffer, use phpcs as a suffix.
+commands:
+  deploy_to_host:
+    parameters:
+      ssh_fingerprint:
+        type: string
+      ssh_user:
+        type: string
+      ssh_host:
+        type: string
+      ssh_port:
+        type: string
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - <<parameters.ssh_fingerprint>>
+      - *attach_workspace
+      - run:
+          name: Deploy to Server
+          command: |
+            echo "Starting deployment to staging server..."
+            source .infisical_env
 
+            REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
+            TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
+
+            echo "Repository: $REPOSITORY"
+            echo "Tag: $TAG"
+            echo "GHCR Username: $GHCR_USERNAME"
+            echo "GHCR PAT: $GHCR_PAT"
+
+            set -x
+            ssh -o StrictHostKeyChecking=no <<parameters.ssh_user>>@<<parameters.ssh_host>> -p <<parameters.ssh_port>> \<< EOF
+            echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
+
+            docker pull $REPOSITORY:$TAG
+            docker run -p 80:80 -d $REPOSITORY:$TAG
+            EOF
 
 # Default configuration for persist_to_workspace and attach_workspace commands
 persist_to_workspace: &persist_to_workspace
@@ -234,7 +270,6 @@ jobs:
             # Push the Docker image
             docker push $REPOSITORY:$TAG
 
-
   deploy-ssh-staging:
     executor: simple-executor
     steps:
@@ -242,28 +277,12 @@ jobs:
           fingerprints:
             - "${STAGING_SSH_FINGERPRINT}"
       - *attach_workspace
-      - deploy:
-          name: Deploy to AWS
-          command: |
-            echo "Starting deployment to staging server..."
-            source .infisical_env
+      - deploy_to_host:
+          ssh_fingerprint: "${STAGING_SSH_FINGERPRINT}"
+          ssh_user: "${STAGING_SSH_USER}"
+          ssh_host: "${STAGING_SSH_HOST}"
+          ssh_port: "${STAGING_SSH_PORT}"
 
-            REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
-            TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
-
-            echo "Repository: $REPOSITORY"
-            echo "Tag: $TAG"
-            echo "GHCR Username: $GHCR_USERNAME"
-            echo "GHCR PAT: $GHCR_PAT"
-
-            set -x
-            ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST -p $STAGING_SSH_PORT \<< EOF
-            echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
-
-
-            docker pull $REPOSITORY:$TAG
-            docker run -p 80:80 -d $REPOSITORY:$TAG
-            EOF
 
 
 #  deploy-ssh-production:
@@ -295,21 +314,16 @@ workflows:
                 - main
                 - master
                 - /^release\/.*/
-      # - deploy-ssh-production:
-      #     requires:
-      #         - hold
-      #     filters:
-      #       branches:
-      #         only:
-      #           - main
-      #           - master
-      - deploy-ssh-staging:
+      - deploy-ssh-production:
           requires:
-            - hold
+              - hold
           filters:
             branches:
               only:
                 - /^release\/.*/
+      - deploy-ssh-staging:
+          requires:
+            - hold
 
 
   container_workflow:
