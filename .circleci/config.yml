@@ -75,6 +75,7 @@ commands:
 
             # Store the private key in a temporary file, just for the connection duration
             echo <<parameters.ssh_private_key>> > ~/temp_ssh_key
+            chmod 600 ~/temp_ssh_key
 
             set -x
             ssh -o StrictHostKeyChecking=no -i ~/temp_ssh_key <<parameters.ssh_user>>@<<parameters.ssh_host>> -p <<parameters.ssh_port>> \<< EOF
