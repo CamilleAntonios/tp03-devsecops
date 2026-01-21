@@ -244,13 +244,19 @@ jobs:
       - deploy:
           name: Deploy to AWS
           command: |
+            echo "Starting deployment to staging server..."
+            source .infisical_env
+
+            REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
+            TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
+
             set -x
-            ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST \<< EOF
-            PHP_FPM_VERSION=$(php -v | head -n 1 | cut -d ' ' -f 2 | cut -d '.' -f 1-2)
-            cd $STAGING_DEPLOY_DIRECTORY
-            git pull origin $CIRCLE_BRANCH
-            composer install --optimize-autoloader --no-interaction --prefer-dist
-            (flock -w 10 9 || exit 1; sudo -S service php${PHP_FPM_VERSION}-fpm restart ) 9>/tmp/fpm.lock
+            ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST -p $STAGING_SSH_PORT \<< EOF
+            echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
+
+
+            docker pull $REPOSITORY:$TAG
+            docker run -p 80:80 -d $REPOSITORY:$TAG
             EOF
 
 
