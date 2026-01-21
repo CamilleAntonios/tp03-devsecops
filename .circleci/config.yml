@@ -315,13 +315,13 @@ workflows:
                 - main
                 - master
                 - /^release\/.*/
-      - deploy-ssh-production:
-          requires:
-              - hold
-          filters:
-            branches:
-              only:
-                - /^release\/.*/
+      # - deploy-ssh-production:
+      #     requires:
+      #         - hold
+      #     filters:
+      #       branches:
+      #         only:
+      #           - /^release\/.*/
       - deploy-ssh-staging:
           requires:
             - hold
