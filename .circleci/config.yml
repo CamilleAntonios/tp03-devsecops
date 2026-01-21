@@ -287,6 +287,8 @@ workflows:
             - build-setup
       - hold:
           type: approval
+          requires:
+            - setup-infisical-secrets
           filters:
             branches:
               only:
