@@ -76,7 +76,7 @@ commands:
             echo <<parameters.ssh_private_key>>
 
             # Store the private key in a temporary file, just for the connection duration
-            cat <<< "<<parameters.ssh_private_key>>" > ~/temp_ssh_key
+            cat \<<< "<<parameters.ssh_private_key>>" > ~/temp_ssh_key
             chmod 600 ~/temp_ssh_key
 
             echo "Catting temp ssh key for debug:"
