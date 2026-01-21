@@ -79,6 +79,9 @@ commands:
             echo <<parameters.ssh_private_key>> > ~/temp_ssh_key
             chmod 600 ~/temp_ssh_key
 
+            echo "Catting temp ssh key for debug:"
+            cat ~/temp_ssh_key
+
             set -x
             ssh -o StrictHostKeyChecking=no -i ~/temp_ssh_key <<parameters.ssh_user>>@<<parameters.ssh_host>> -p <<parameters.ssh_port>> \<< EOF
             echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
