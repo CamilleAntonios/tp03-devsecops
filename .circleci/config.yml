@@ -241,6 +241,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "${STAGING_SSH_FINGERPRINT}"
+      - *attach_workspace
       - deploy:
           name: Deploy to AWS
           command: |
