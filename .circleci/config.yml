@@ -81,11 +81,11 @@ commands:
             echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
 
             # Stop and delete before running the new container
-            docker stop $REPOSITORY && echo "Stopped previous instance" || echo "No previous instance to stop"
+            docker stop $CIRCLE_PROJECT_REPONAME && echo "Stopped previous instance" || echo "No previous instance to stop"
             docker rm $REPOSITORY:$TAG && echo "Removed former image" || echo "No former image to remove"
 
             docker pull $REPOSITORY:$TAG
-            docker run -p 80:80 -d  --name $REPOSITORY $REPOSITORY:$TAG
+            docker run -p 80:80 -d  --name $CIRCLE_PROJECT_REPONAME $REPOSITORY:$TAG
             EOF
 
 # This main executor is used by all jobs unless otherwise specified
