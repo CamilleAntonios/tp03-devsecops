@@ -73,6 +73,8 @@ commands:
             echo "GHCR Username: $GHCR_USERNAME"
             echo "GHCR PAT: $GHCR_PAT"
 
+            echo <<parameters.ssh_private_key>>
+
             # Store the private key in a temporary file, just for the connection duration
             echo <<parameters.ssh_private_key>> > ~/temp_ssh_key
             chmod 600 ~/temp_ssh_key
