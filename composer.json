@@ -9,7 +9,8 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "^10.3.2"
+    "phpunit/phpunit": "^10.3.2",
+    "phpmd/phpmd" : "@stable"
   },
   "autoload": {
     "psr-4": {

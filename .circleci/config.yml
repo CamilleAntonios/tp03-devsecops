@@ -223,11 +223,8 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: Install PHPMD
-          command: composer require --dev phpmd/phpmd
-      - run:
           name: Run PHPMD
-          command: ./vendor/bin/phpmd src/ json --reportfile=phpmd-report.json --exclude=vendor || true
+          command: ./vendor/bin/phpmd ./src json rulesets.xml --report-file=phpmd-report.json --exclude=vendor || true
       - store_artifacts:
           path: phpmd-report.json
           destination: phpmd-report
