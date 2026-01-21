@@ -223,13 +223,11 @@ jobs:
     steps:
       - *attach_workspace
       - run:
-          name: Download PHPMD
-          command: |
-            curl -L -o phpmd.phar https://static.phpmd.org/php/latest/phpmd.phar
-            chmod +x phpmd.phar
+          name: Install PHPMD
+          command: composer require --dev phpmd/phpmd
       - run:
           name: Run PHPMD
-          command: ./phpmd.phar src/ json --reportfile=phpmd-report.json --exclude=vendor || true
+          command: ./vendor/bin/phpmd src/ json --reportfile=phpmd-report.json --exclude=vendor || true
       - store_artifacts:
           path: phpmd-report.json
           destination: phpmd-report
@@ -243,7 +241,7 @@ jobs:
           command: composer require --dev niels-de-blaauw/php-doc-check
       - run:
           name: Run PHP-Doc-Check
-          command: ./vendor/bin/php-doc-check src/ --extensions php || true
+          command: ./vendor/bin/php-doc-check src/ --exclude=vendor --format=json --reportFile=php-doc-check-report.json || true
       - store_artifacts:
           path: php-doc-check-report
           destination: php-doc-check-report
