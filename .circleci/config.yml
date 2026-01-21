@@ -241,7 +241,7 @@ jobs:
           command: composer require --dev niels-de-blaauw/php-doc-check
       - run:
           name: Run PHP-Doc-Check
-          command: ./vendor/bin/php-doc-check src/ || true
+          command: ./vendor/bin/php-doc-check src/ --format=json --reportFile=php-doc-check-report.json --exclude=vendor || true
       - store_artifacts:
           path: php-doc-check-report.json
           destination: php-doc-check-report
