@@ -80,8 +80,12 @@ commands:
             ssh -o StrictHostKeyChecking=no <<parameters.ssh_user>>@<<parameters.ssh_host>> -p <<parameters.ssh_port>> \<< EOF
             echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
 
+            # Stop and delete before running the new container
+            docker stop $REPOSITORY || true
+            docker rm $REPOSITORY:$TAG || true
+
             docker pull $REPOSITORY:$TAG
-            docker run -p 80:80 -d $REPOSITORY:$TAG
+            docker run -p 80:80 -d $REPOSITORY:$TAG --name $REPOSITORY
             EOF
 
 # This main executor is used by all jobs unless otherwise specified
