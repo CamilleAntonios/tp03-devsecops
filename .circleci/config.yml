@@ -251,6 +251,11 @@ jobs:
             REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
             TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
 
+            echo "Repository: $REPOSITORY"
+            echo "Tag: $TAG"
+            echo "GHCR Username: $GHCR_USERNAME"
+            echo "GHCR PAT: $GHCR_PAT"
+
             set -x
             ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST -p $STAGING_SSH_PORT \<< EOF
             echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
