@@ -88,8 +88,8 @@ commands:
 
             # Stop and delete before running the new container
             docker stop $CIRCLE_PROJECT_REPONAME && echo "Stopped previous instance" || echo "No previous instance to stop"
-            docker image rm $REPOSITORY:$TAG && echo "Removed former image" || echo "No former image to remove"
             docker container rm $CIRCLE_PROJECT_REPONAME && echo "Removed former container" || echo "No former container to remove"
+            docker image rm $REPOSITORY:$TAG && echo "Removed former image" || echo "No former image to remove"
 
             docker pull $REPOSITORY:$TAG
             docker run -p 80:80 -d  --name $CIRCLE_PROJECT_REPONAME $REPOSITORY:$TAG
