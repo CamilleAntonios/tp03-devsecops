@@ -218,6 +218,36 @@ jobs:
           path: phploc-report.csv
           destination: phploc-report
 
+  lint-phpmd:
+    executor: php-executor
+    steps:
+      - *attach_workspace
+      - run:
+          name: Download PHPMD
+          command: |
+            curl -L -o phpmd.phar https://static.phpmd.org/php/latest/phpmd.phar
+            chmod +x phpmd.phar
+      - run:
+          name: Run PHPMD
+          command: ./phpmd.phar src/ json --reportfile=phpmd-report.json --exclude=vendor || true
+      - store_artifacts:
+          path: phpmd-report.json
+          destination: phpmd-report
+
+  lint-php-doc-check:
+    executor: php-executor
+    steps:
+      - *attach_workspace
+      - run:
+          name: Install PHP-Doc-Check
+          command: composer require --dev niels-de-blaauw/php-doc-check
+      - run:
+          name: Run PHP-Doc-Check
+          command: ./vendor/bin/php-doc-check src/ --extensions php || true
+      - store_artifacts:
+          path: php-doc-check-report
+          destination: php-doc-check-report
+
 
   build-docker-image:
     executor: builder-executor
@@ -307,6 +337,12 @@ workflows:
           requires:
             - build-setup
       - metrics-phploc:
+          requires:
+            - build-setup
+      - lint-phpmd:
+          requires:
+            - build-setup
+      - lint-php-doc-check:
           requires:
             - build-setup
       - hold:
