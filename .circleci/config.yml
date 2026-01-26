@@ -308,7 +308,9 @@ workflows:
     jobs:
       - debug-info
       - setup-infisical-secrets
-      - build-setup
+      - build-setup:
+          requires:
+            - setup-infisical-secrets
       - lint-phpcs:
           requires:
             - build-setup
@@ -318,41 +320,32 @@ workflows:
       - test-phpunit:
           requires:
             - build-setup
-      - hold:
-          type: approval
+      - build-docker-image:
           requires:
-            - setup-infisical-secrets
+            # Only allow building the Docker image to production when all previous jobs succeeded
+            - test-phpunit
+            - lint-phpcs
+            - security-check-dependencies
           filters:
             branches:
               only:
-                - main
-                - master
                 - /^release\/.*/
       - deploy-ssh-production:
           requires:
-              - hold
-          filters:
-            branches:
-              only:
-                - /^release\/.*/
-      - deploy-ssh-staging:
+              - build-docker-image
+
+  staging_deploy_workflow:
+    # No branches restriction : you could want to deploy on staging for any branch, to check the visual aspect
+    # of your feature for example
+    jobs:
+      - hold:
+          type: approval
+      - setup-infisical-secrets:
           requires:
             - hold
-
-
-  container_workflow:
-    jobs:
-      - setup-infisical-secrets
       - build-docker-image:
           requires:
             - setup-infisical-secrets
-          filters:
-            branches:
-              only:
-                - master
-                - main
-                - develop
-                - /^feature\/.*/
-                - /^release\/.*/
-                - /^hotfix\/.*/
-                - /^bugfix\/.*/
+      - deploy-ssh-staging:
+          requires:
+            - build-docker-image
