@@ -396,7 +396,7 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 
 ### 1. **main_workflow**
 
-Exécuté sur : **Toutes les branches**
+Exécuté sur : **Les branches `main` et `release/*`**
 
 **Ordre d'exécution** :
 
@@ -555,7 +555,7 @@ Le pipeline suit les conventions de nommage suivantes :
 ## Branchement
 
 ### main_workflow
-- **Déclencheur** : Toutes les branches
+- **Déclencheur** : Les branches `main` et `release/*`
 - **Déploiement production** : Branches `release/*` uniquement
 
 ### staging_deploy_workflow
