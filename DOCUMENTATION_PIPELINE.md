@@ -46,7 +46,7 @@ Configuration des dépendances PHP (build-setup)
 
 ### Flux global du workflow "staging_deploy"
 ```
-validation manuelle (hold) (si branche "feature/*" ou "bugfix/*")
+validation manuelle (hold) (si branche "feature/*" ou "fix/*")
          ↓
    récupération des secrets Infisical
          ↓
@@ -568,7 +568,7 @@ main (branche principale)
 ├── release/v1.0.0 (déclenche déploiement production)
 ├── release/v1.0.1
 ├── feature/nouvelle-fonctionnalite (déclenche déploiement staging avec approbation)
-└── bugfix/bug-critique (déclenche déploiement staging avec approbation)
+└── fix/bug-critique (déclenche déploiement staging avec approbation)
 ```
 
 ---
