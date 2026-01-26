@@ -14,7 +14,7 @@ use function imagettftext;
 
 class ImageCreator
 {
-    protected $im;
+    protected $image;
     protected int $white;
     protected int $yourColor;
     protected int $yourColor2;
@@ -30,7 +30,7 @@ class ImageCreator
         string $text2 = "Une superbe image"
     ) {
         // Création d'une image de 400x200 pixels
-        $this->im = imagecreatetruecolor(600, 200);
+        $this->image = imagecreatetruecolor(600, 200);
         $this->white = $this->allocateColor([255, 255, 255]);
         $this->yourColor = $this->allocateColor($yourColor);
         $this->yourColor2 = $this->allocateColor($yourColor2);
@@ -50,34 +50,37 @@ class ImageCreator
 
     private function allocateColor(array $rgb): false|int
     {
-        return imagecolorallocate($this->im, ...$rgb);
+        return imagecolorallocate($this->image, ...$rgb);
     }
 
 
     public function createImage(): void
     {
         // Dessine un double rectangle
-        imagefilledrectangle($this->im, 0, 0, 600, 200, $this->yourColor);
-        imagefilledrectangle($this->im, 10, 10, 590, 190, $this->yourColor2);
+        imagefilledrectangle($this->image, 0, 0, 600, 200, $this->yourColor);
+        imagefilledrectangle($this->image, 10, 10, 590, 190, $this->yourColor2);
 
         // Ajout du texte
         imagettftext($this->im, 20, 0, 50, 50, $this->white, $this->font, $this->text);
         imagettftext($this->im, 12, 0, 50, 80, $this->white, $this->font, $this->text2);
 
         // Sauvegarde l'image
-        imagepng($this->im);
-        imagedestroy($this->im);
+        imagepng($this->image);
+        imagedestroy($this->image);
     }
     public function get_title() : string{
-        if(strlen($this->title) > 20 ){
+        //renvoye le titre de l'image
+        if(strlen($this->title) > 20 ) {
             if(strpos($this->title,'.') !== false && strpos($this->title,'.') < 20){
                 [$title] = explode('.', $this->title, 2);
-            }else{
-                $title = substr($this->title, 0, 17) . '...';
             }
-        }else{
-            $title = $this->title;
+            else{
+                $title = substr($this->title, 0, 17) . '...';
+                return strtoupper($title);
+            }
         }
+
+        $title = $this->title;
         return strtoupper($title);
     }
 }
