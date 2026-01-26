@@ -68,7 +68,11 @@ class ImageCreator
         imagepng($this->image);
         imagedestroy($this->image);
     }
-    public function get_title() : string{
+    public function get_title() : string {
+        /**
+         * Renvoie le titre de l'image en majuscule
+         * Si le titre fait plus de 20 caracteres, il est tronque a 17 caracteres suivi de '...'
+         */
         //renvoye le titre de l'image
         if(strlen($this->title) > 20 ) {
             if(strpos($this->title,'.') !== false && strpos($this->title,'.') < 20){
