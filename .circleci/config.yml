@@ -65,7 +65,7 @@ commands:
             echo "Starting deployment to staging server..."
             source .infisical_env
 
-            REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
+            REPOSITORY=$(echo "ghcr.io/$GHCR_ORGANIZATION/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
             TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
 
             # Store the private key in a temporary file, just for the connection duration
