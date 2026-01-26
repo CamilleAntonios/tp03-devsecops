@@ -95,8 +95,11 @@ RUN chown -R www-data:www-data /var/www/html
 # Define the working directory
 WORKDIR /var/www/html
 
-# ADD : run composer install
+# ADDED : run composer install
 RUN composer install
+
+# ADDED : do not run as root
+USER www-data
 
 # Exposez le port 80
 EXPOSE 80
