@@ -348,7 +348,12 @@ workflows:
   main_workflow:
     jobs:
       - debug-info
-      - setup-infisical-secrets
+      - setup-infisical-secrets:
+          filters:
+            branches:
+              only:
+                - /^release\/.*/
+                - main
       - build-setup:
           requires:
             - setup-infisical-secrets
