@@ -68,4 +68,16 @@ class ImageCreator
         imagepng($this->im);
         imagedestroy($this->im);
     }
+    public function get_title() : string{
+        if(strlen($this->title) > 20 ){
+            if(strpos($this->title,'.') !== false && strpos($this->title,'.') < 20){
+                [$title] = explode('.', $this->title, 2);
+            }else{
+                $title = substr($this->title, 0, 17) . '...';
+            }
+        }else{
+            $title = $this->title;
+        }
+        return strtoupper($title);
+    }
 }
