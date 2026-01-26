@@ -25,23 +25,35 @@ Ce pipeline CircleCI v2.1 automatise le processus de :
 
 ## Architecture du pipeline
 
-### Flux global
+### Flux global du workflow "main"
 
 ```
-setup-infisical-secrets
+Récupération des secrets Infisical (setup-infisical-secrets)
         ↓
-    build-setup
+Configuration des dépendances PHP (build-setup)
         ↓
 ┌───────┬───────┬───────┬───────┬───────┬───────┬───────┐
 │ phpcs │security│phpunit│metrics│metrics│  phpmd  │php-doc│
 │       │ check  │       │metrics│phploc │         │ check │
 └───────┴───────┴───────┴───────┴───────┴───────┴───────┘
         ↓
-   build-docker-image (branche release/*)
+   Création de l'image Docker (build-docker-image) (si branche release/*)
         ↓
-  deploy-ssh-production
+  Déploiement en production (deploy-ssh-production) (si branche release/*)
 ```
 
+---
+
+### Flux global du workflow "staging_deploy"
+```
+validation manuelle (hold) (si branche "feature/*" ou "bugfix/*")
+         ↓
+   récupération des secrets Infisical
+         ↓
+   build-docker-image
+         ↓
+   déploiement sur l'environnement staging
+```
 ---
 
 ## Executors
@@ -89,7 +101,6 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 - Affiche le PATH
 - Affiche le répertoire de travail
 - Affiche la date/heure
-- Affiche le contenu du fichier `.infisical_env`
 - Affiche toutes les variables d'environnement
 
 ---
@@ -252,9 +263,8 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 3. Génère un rapport JSON
    ```bash
    ./vendor/bin/phpmd src/ json cleancode,codesize,design,naming,unusedcode \
-     --exclude=vendor --report-file=phpmd-report.json || true
+     --exclude=vendor --report-file=phpmd-report.json 
    ```
-4. Le `|| true` signifie que le job ne bloque pas si des problèmes sont détectés
 
 **Dépendances** : `build-setup`
 
@@ -272,10 +282,9 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 2. Vérifie que toutes les classes/méthodes sont documentées
    ```bash
    ./vendor/bin/php-doc-check src/ --format=json \
-     --reportFile=php-doc-check-report.json --exclude=vendor || true
+     --reportFile=php-doc-check-report.json --exclude=vendor
    ```
 3. Génère un rapport JSON
-4. Le `|| true` signifie que le job ne bloque pas si des problèmes sont détectés
 
 **Dépendances** : `build-setup`
 
@@ -308,7 +317,7 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 
 **Dockerfile** : `docker/Dockerfile`
 
-**Dépendances** : `test-phpunit`, `lint-phpcs`, `security-check-dependencies`
+**Dépendances** : `test-phpunit`, `lint-phpcs`, `security-check-dependencies`, `metrics-phpmetrics`, `metrics-phploc`, `lint-phpmd`, `lint-php-doc-check`
 
 **Filtres** : Branches `release/*` uniquement
 
@@ -409,7 +418,7 @@ Exécuté sur : **Toutes les branches**
    └── Dépendent tous de : build-setup
    
 4. build-docker-image
-   ├── Dépend de : test-phpunit, lint-phpcs, security-check-dependencies
+   ├── Dépend de : test-phpunit, lint-phpcs, security-check-dependencies, metrics-phpmetrics, metrics-phploc, lint-phpmd, lint-php-doc-check
    ├── Filtres : Branches release/* seulement
    
 5. deploy-ssh-production
