@@ -98,6 +98,10 @@ WORKDIR /var/www/html
 # ADDED : run composer install
 RUN composer install
 
+# set all files to be owned by root, and disable write permission for others (including www-data)
+RUN chown -R root:root * 
+RUN chmod o-w -R *
+
 # ADDED : do not run as root
 USER www-data
 
