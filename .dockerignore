@@ -29,3 +29,5 @@ Docker
 .phpunit.result.cache
 .vagrant
 vendor
+
+.infisical_env

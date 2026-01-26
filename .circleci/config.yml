@@ -33,8 +33,6 @@ version: 2.1
 #
 #  2. Suffixes based on the specific tool or task:
 #  For example, for a job that uses PHP_CodeSniffer, use phpcs as a suffix.
-
-
 # Default configuration for persist_to_workspace and attach_workspace commands
 persist_to_workspace: &persist_to_workspace
   persist_to_workspace:
@@ -46,6 +44,46 @@ attach_workspace: &attach_workspace
   attach_workspace:
     # Must be absolute path or relative path from working_directory
     at: ~/project
+
+
+commands:
+  deploy_to_host:
+    parameters:
+      ssh_private_key:
+        type: string
+      ssh_user:
+        type: string
+      ssh_host:
+        type: string
+      ssh_port:
+        type: string
+    steps:
+      - *attach_workspace
+      - run:
+          name: Deploy to Server
+          command: |
+            echo "Starting deployment to staging server..."
+            source .infisical_env
+
+            REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
+            TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
+
+            # Store the private key in a temporary file, just for the connection duration
+            cat \<<< "<<parameters.ssh_private_key>>" > ~/temp_ssh_key
+            chmod 600 ~/temp_ssh_key
+
+            set -x
+            ssh -o StrictHostKeyChecking=no -i ~/temp_ssh_key <<parameters.ssh_user>>@<<parameters.ssh_host>> -p <<parameters.ssh_port>> \<< EOF
+            echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
+
+            # Stop and delete before running the new container
+            docker stop $CIRCLE_PROJECT_REPONAME && echo "Stopped previous instance" || echo "No previous instance to stop"
+            docker container rm $CIRCLE_PROJECT_REPONAME && echo "Removed former container" || echo "No former container to remove"
+            docker image rm $REPOSITORY:$TAG && echo "Removed former image" || echo "No former image to remove"
+
+            docker pull $REPOSITORY:$TAG
+            docker run -p 80:80 -d  --name $CIRCLE_PROJECT_REPONAME $REPOSITORY:$TAG
+            EOF
 
 # This main executor is used by all jobs unless otherwise specified
 executors:
@@ -270,9 +308,6 @@ jobs:
             REPOSITORY=$(echo "ghcr.io/$GHCR_USERNAME/$CIRCLE_PROJECT_USERNAME" | tr '[:upper:]' '[:lower:]' | tr -d '_')
             TAG=$(echo $CIRCLE_BRANCH | tr '[:upper:]' '[:lower:]' | tr '/' '-' | tr -cd '[:alnum:]._-' | cut -c 1-128)
 
-            echo $GHCR_PAT
-            echo $GHCR_USERNAME
-
             # Login to GHCR
             echo $GHCR_PAT | docker login ghcr.io --username $GHCR_USERNAME --password-stdin
 
@@ -292,28 +327,25 @@ jobs:
             # Push the Docker image
             docker push $REPOSITORY:$TAG
 
-
   deploy-ssh-staging:
     executor: simple-executor
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "${STAGING_SSH_FINGERPRINT}"
-      - deploy:
-          name: Deploy to AWS
-          command: |
-            set -x
-            ssh -o StrictHostKeyChecking=no $STAGING_SSH_USER@$STAGING_SSH_HOST \<< EOF
-            PHP_FPM_VERSION=$(php -v | head -n 1 | cut -d ' ' -f 2 | cut -d '.' -f 1-2)
-            cd $STAGING_DEPLOY_DIRECTORY
-            git pull origin $CIRCLE_BRANCH
-            composer install --optimize-autoloader --no-interaction --prefer-dist
-            (flock -w 10 9 || exit 1; sudo -S service php${PHP_FPM_VERSION}-fpm restart ) 9>/tmp/fpm.lock
-            EOF
+      - *attach_workspace
+      - deploy_to_host:
+          ssh_private_key: "${STAGING_SSH_PRIVATE_KEY}"
+          ssh_user: "${STAGING_SSH_USER}"
+          ssh_host: "${STAGING_SSH_HOST}"
+          ssh_port: "${STAGING_SSH_PORT}"
 
-
-#  deploy-ssh-production:
-# It's up to you :)
+  deploy-ssh-production:
+    executor: simple-executor
+    steps:
+      - *attach_workspace
+      - deploy_to_host:
+          ssh_private_key: "${PRODUCTION_SSH_PRIVATE_KEY}"
+          ssh_user: "${PRODUCTION_SSH_USER}"
+          ssh_host: "${PRODUCTION_SSH_HOST}"
+          ssh_port: "${PRODUCTION_SSH_PORT}"
 
 
 workflows:
@@ -321,7 +353,9 @@ workflows:
     jobs:
       - debug-info
       - setup-infisical-secrets
-      - build-setup
+      - build-setup:
+          requires:
+            - setup-infisical-secrets
       - lint-phpcs:
           requires:
             - build-setup
@@ -343,44 +377,37 @@ workflows:
       - lint-php-doc-check:
           requires:
             - build-setup
+      - build-docker-image:
+          requires:
+            # Only allow building the Docker image to production when all previous jobs succeeded
+            - test-phpunit
+            - lint-phpcs
+            - security-check-dependencies
+          filters:
+            branches:
+              only:
+                - /^release\/.*/
+      - deploy-ssh-production:
+          requires:
+              - build-docker-image
+
+  staging_deploy_workflow:
+    # No branches restriction : you could want to deploy on staging for any branch, to check the visual aspect
+    # of your feature for example
+    jobs:
       - hold:
           type: approval
           filters:
             branches:
               only:
-                - main
-                - master
-                - /^release\/.*/
-      # - deploy-ssh-production:
-      #     requires:
-      #         - hold
-      #     filters:
-      #       branches:
-      #         only:
-      #           - main
-      #           - master
-      - deploy-ssh-staging:
+                - /^feature\/.*/
+                - /^fix\/.*/
+      - setup-infisical-secrets:
           requires:
             - hold
-          filters:
-            branches:
-              only:
-                - /^release\/.*/
-
-
-  container_workflow:
-    jobs:
-      - setup-infisical-secrets
       - build-docker-image:
           requires:
             - setup-infisical-secrets
-          filters:
-            branches:
-              only:
-                - master
-                - main
-                - develop
-                - /^feature\/.*/
-                - /^release\/.*/
-                - /^hotfix\/.*/
-                - /^bugfix\/.*/
+      - deploy-ssh-staging:
+          requires:
+            - build-docker-image
