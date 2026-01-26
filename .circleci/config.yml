@@ -345,7 +345,7 @@ jobs:
 
 
 workflows:
-  main_workflow:
+  production_workflow:
     jobs:
       - debug-info
       - setup-infisical-secrets:

@@ -25,7 +25,7 @@ Ce pipeline CircleCI v2.1 automatise le processus de :
 
 ## Architecture du pipeline
 
-### Flux global du workflow "main"
+### Flux global du workflow "production"
 
 ```
 Récupération des secrets Infisical (setup-infisical-secrets)
@@ -359,7 +359,7 @@ Les executors définissent l'environnement d'exécution pour chaque job.
    - `ssh_host` : `${PRODUCTION_SSH_HOST}`
    - `ssh_port` : `${PRODUCTION_SSH_PORT}`
 
-**Dépendances** : `build-docker-image` (dans main_workflow)
+**Dépendances** : `build-docker-image` (dans production_workflow)
 
 ---
 
@@ -394,7 +394,7 @@ Les executors définissent l'environnement d'exécution pour chaque job.
 
 ## Workflows
 
-### 1. **main_workflow**
+### 1. **production_workflow**
 
 Exécuté sur : **Les branches `main` et `release/*`**
 
@@ -554,7 +554,7 @@ Le pipeline suit les conventions de nommage suivantes :
 
 ## Branchement
 
-### main_workflow
+### production_workflow
 - **Déclencheur** : Les branches `main` et `release/*`
 - **Déploiement production** : Branches `release/*` uniquement
 
@@ -568,7 +568,7 @@ main (branche principale)
 ├── release/v1.0.0 (déclenche déploiement production)
 ├── release/v1.0.1
 ├── feature/nouvelle-fonctionnalite (déclenche déploiement staging avec approbation)
-└── fix/bug-critique (déclenche déploiement staging avec approbation)
+└── bugfix/bug-critique (déclenche déploiement staging avec approbation)
 ```
 
 ---
